@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Die!</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <button id="button1" onclick="buttonclicked()">Click me!</button>
+
+    <script>
+
+    const socket = io()
+
+    socket.on("connect", () => {
+        console.log(socket.id)
+    });
+    
+    socket.on("disconnect", ()=>{
+        console.log("disconnected")
+    })
+
+    socket.on("test", ()=>{
+        console.log("received test")
+    })
+
+        async function fetchAll(url, type, bodyData){
+            if(type == "get"){
+                const response = await fetch(url, {method:type})
+                const data = await response.json()
+                return data
+            } else if(type == "post"){
+                const response = await fetch(url, {
+                    method: type,
+                    headers: {"Content-type": "application/json"},
+                    body: JSON.stringify(bodyData)
+                })
+                const data = await response.json()
+                console.log(response)
+                return data
+            }
+        }
+
+        function getData(){
+            fetchAll("/data", "get")
+                .then((data)=>{
+                    console.log(data.value)
+                    if(data.value){
+                        document.getElementById("button1").innerText = data.value
+                    }
+                })
+                .catch((error)=>{
+                    console.log(error)
+                })
+        }
+
+        setInterval(getData, 1000)
+
+        
+        function buttonclicked(){
+            const number = Math.floor(Math.random() * 6 + 1)
+            console.log(number)
+            //document.getElementById("button1").innerText = number
+            fetchAll("/data", "post", {value: number})
+                .then((data)=>{
+                    console.log(data.value)
+                    if(data.value){
+                        document.getElementById("button1").innerText = data.value
+                    }
+                })
+                .catch((error)=>{
+                    console.log(error)
+                })
+        }
+
+    </script>
+</body>
+</html>
